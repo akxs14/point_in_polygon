@@ -71,17 +71,13 @@ object PNPoly {
     for(i <- 0 to (polygon.length - 1)) {
       if(polygon(i).y <= p.y) {
         if(polygon((i+1) % polygon.length).y > p.y)
-          if(isLeft(polygon(i), polygon((i+1) % polygon.length), p) > 0) {
+          if(isLeft(polygon(i), polygon((i+1) % polygon.length), p) > 0)
             wn = wn + 1
-            println("up")
-          } 
       }
       else {
         if(polygon((i+1) % polygon.length).y <= p.y)
-          if(isLeft(polygon(i), polygon((i+1) % polygon.length), p) < 0) {
+          if(isLeft(polygon(i), polygon((i+1) % polygon.length), p) < 0)
             wn = wn - 1
-            println("down")
-          }
       }
     }
     wn
