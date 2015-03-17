@@ -29,7 +29,6 @@ object PNPoly {
  /*
   * calcCrossingNumber(): Performs the crossing number test for a point
   *                       and a polygon.
-  *           infinite line.
   *
   * Input:
   *       p: The point to examine in the test.
@@ -37,37 +36,73 @@ object PNPoly {
   *
   * Return:
   *       0: Point p is outside of the polygon.
-  *       1: Point p is inside of the polygon.
+  *       1: Point p is inside the polygon.
   */
   def calcCrossingNumber(p: Point, polygon: Vector[Point]): Int = {
-    var wn: Int = 0
-    var n: Int = polygon.length - 1
+    var cn: Int = 0 // number of ray - polygon cross sections 
+    var vt: Double = 0.0
 
-    for(i <- 0 to n) {
+    for(i <- 0 to (polygon.length - 1)) {
+      if(((polygon(i).y <= p.y) && (polygon((i+1) % polygon.length).y > p.y))
+        || ((polygon(i).y > p.y) && (polygon((i+1) % polygon.length).y <= p.y))) {
+          vt = (p.y - polygon(i).y) / (polygon((i+1) % polygon.length).y - polygon(i).y)
+
+          if(p.x < polygon(i).x + vt * (polygon((i+1) % polygon.length).x - polygon(i).x))
+            cn = cn + 1
+      }
+    }
+    (cn & 1)
+  }
+
+ /*
+  * calcWindingNumber(): Calculates how many times the polygon winds around a point.
+  *
+  * Input:
+  *       p: The point to examine in the test.
+  *       polygon: The polygon used in the test.
+  *
+  * Return:
+  *       0: Point p is outside of the polygon.
+  *       Other than 0: Point p is inside the polygon.
+  */
+  def calcWindingNumber(p: Point, polygon: Vector[Point]): Int = {
+    var wn: Int = 0
+
+    for(i <- 0 to (polygon.length - 1)) {
       if(polygon(i).y <= p.y) {
         if(polygon((i+1) % polygon.length).y > p.y)
-          if(isLeft(polygon(i), polygon((i+1) % polygon.length), p) > 0)
+          if(isLeft(polygon(i), polygon((i+1) % polygon.length), p) > 0) {
             wn = wn + 1
             println("up")
+          } 
       }
       else {
         if(polygon((i+1) % polygon.length).y <= p.y)
-          if(isLeft(polygon(i), polygon((i+1) % polygon.length), p) < 0)
+          if(isLeft(polygon(i), polygon((i+1) % polygon.length), p) < 0) {
             wn = wn - 1
             println("down")
+          }
       }
     }
     wn
   }
 
-
-  def abs(n: Int): Int =
-    if (n < 0) -n
-    else n
-
-  private def formatAbs(x: Int) = {
-    val msg = "The absolute value of %d is %d"
-    msg.format(x, abs(x))
+ /*
+  * isPointInPolygon(): Verifies whether a point is inside a polygon.
+  *                     It uses the result both from crossing number
+  *                     and the winding number method in order to include
+  *                     points that lie on one of the polygon's vertices.
+  *
+  * Input:
+  *       p: The point to examine in the test.
+  *       polygon: The polygon used in the test.
+  *
+  * Return:
+  *       false: Point p is outside of the polygon.
+  *       true: Point p is inside the polygon.
+  */
+  def isPointInPolygon(p: Point, polygon: Vector[Point]): Boolean = {
+    (calcCrossingNumber(p,polygon) == 1) | (calcWindingNumber(p,polygon) != 0)
   }
 
   def main(args: Array[String]) {
@@ -77,16 +112,13 @@ object PNPoly {
 
     val p1 = new Point(10,10)
     val p2 = new Point(10,2)
-    val p3 = new Point(10,2)
+    val p3 = new Point(20,5)
     val poly = Vector(p1,p2,p3)
 
-    println("isLeft pa0: %f", isLeft(pa0, p1, p2))
-    println("isLeft pb0: %f", isLeft(pb0, p1, p2))
-    println("isLeft pc0: %f", isLeft(pc0, p1, p2))
+    println("\nisPointInPolygon pa0:", isPointInPolygon(pa0,poly))
 
+    println("\nisPointInPolygon pa0:", isPointInPolygon(pb0,poly))
 
-    println("calcCrossingNumber pa0: %f", calcCrossingNumber(pa0,poly))
-    println("calcCrossingNumber pb0: %f", calcCrossingNumber(pb0,poly))
-    println("calcCrossingNumber pc0: %f", calcCrossingNumber(pc0,poly))
+    println("\nisPointInPolygon pa0:", isPointInPolygon(pc0,poly))
   }
 }
